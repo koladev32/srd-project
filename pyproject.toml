@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "evaboot-agent-runtime"
+version = "0.1.0"
+description = "A bounded, observable SDR agent runtime"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.34,<1",
+  "pydantic>=2.10,<3",
+  "openai>=1.68,<3",
+  "typesafe-sdk>=0.4,<1",
+  "python-dotenv>=1,<2",
+]
+
+[project.scripts]
+evaboot-agent = "evaboot_agent.cli:main"
+evaboot-eval = "evaboot_agent.agent_eval:main"
+
+[project.optional-dependencies]
+live = ["mcp>=1.13"]
+dev = ["pytest>=8.3,<9", "httpx>=0.28,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/evaboot_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["evaboot_agent"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

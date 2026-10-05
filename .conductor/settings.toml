@@ -1,0 +1,15 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.lock && .venv/bin/python -m pip install -e . --no-deps"
+run_mode = "concurrent"
+
+[scripts.run.dev]
+available_in = [ "local" ]
+command = ".venv/bin/python -m uvicorn evaboot_agent.main:app --host 127.0.0.1 --port $CONDUCTOR_PORT"
+default = true
+icon = "play"
+
+[scripts.run.test]
+command = ".venv/bin/python -m pytest"
+icon = "test-tube"
