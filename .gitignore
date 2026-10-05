@@ -1,0 +1,39 @@
+# Credentials and machine-local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Local runtime data and agent artifacts
+.context/
+.agents/
+.evaboot-agent/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Python environments, caches, and build output
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.py[cod]
+dist/
+build/
+*.egg-info/
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/

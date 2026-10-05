@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A bounded SDR agent runtime with deterministic Python guardrails.">
+  <title>Evaboot Agent Runtime</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: 'hsl(var(--ui-border))', input: 'hsl(var(--ui-input))', ring: 'hsl(var(--ui-ring))',
+            background: 'hsl(var(--ui-background))', foreground: 'hsl(var(--ui-foreground))',
+            primary: { DEFAULT: 'hsl(var(--ui-primary))', foreground: 'hsl(var(--ui-primary-foreground))' },
+            secondary: { DEFAULT: 'hsl(var(--ui-secondary))', foreground: 'hsl(var(--ui-secondary-foreground))' },
+            muted: { DEFAULT: 'hsl(var(--ui-muted))', foreground: 'hsl(var(--ui-muted-foreground))' },
+            accent: { DEFAULT: 'hsl(var(--ui-accent))', foreground: 'hsl(var(--ui-accent-foreground))' },
+            destructive: { DEFAULT: 'hsl(var(--ui-destructive))', foreground: 'hsl(var(--ui-destructive-foreground))' },
+            card: { DEFAULT: 'hsl(var(--ui-card))', foreground: 'hsl(var(--ui-card-foreground))' }
+          },
+          borderRadius: { lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)' },
+          fontFamily: { sans: ['DM Sans', 'ui-sans-serif', 'system-ui'], display: ['Manrope', 'ui-sans-serif', 'system-ui'] },
+          boxShadow: { card: '0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04)' }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="stylesheet" href="/static/shadcn.css">
+</head>
+<body class="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-emerald-100 selection:text-emerald-950">
+  <div class="app-shell">
+    <aside class="sidebar border-r border-border bg-card">
+      <a class="brand group" href="/" aria-label="Agent Runtime home">
+        <span class="brand-mark shadow-sm ring-1 ring-emerald-900/10">A</span><span><strong class="font-display">Agent Runtime</strong><small>Bounded SDR workflow</small></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="nav-tabs" aria-label="Workspace views">
+        <button class="nav-tab active" data-view="overview"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Overview</button>
+        <button class="nav-tab" data-view="prospects"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span> Prospects <span id="prospect-count" class="nav-count">0</span></button>
+        <button class="nav-tab" data-view="trace"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4v16h16"/><path d="m7 15 4-4 3 3 5-7"/></svg></span> Run trace</button>
+        <button class="nav-tab" data-view="learning"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="m7 16 4-5 4 3 4-7"/></svg></span> Learning</button>
+      </nav>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-heading"><span>RECENT RUNS</span><button id="new-run-small" class="icon-button" title="New run" aria-label="Create new run">＋</button></div>
+      <div id="run-list" class="run-list"><div class="empty-sidebar">No runs yet</div></div>
+      <div class="sidebar-bottom">
+        <a href="/api/report.md" target="_blank" rel="noopener" class="report-link">↗ &nbsp;Engineering report</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar border-b border-border bg-background/80 backdrop-blur-xl">
+        <div class="breadcrumbs"><span>Workspace</span><span class="slash">/</span><strong id="breadcrumb-current">Overview</strong></div>
+        <div class="topbar-right">
+          <button id="new-run" class="button button-dark button-small shadow-sm">＋ &nbsp;New run</button>
+        </div>
+      </header>
+
+      <section id="view-overview" class="view active">
+        <div class="page-heading">
+          <div><div class="eyebrow">AGENT WORKSPACE</div><h1 class="font-display">Build a qualified pipeline<span class="heading-period">.</span></h1><p>Plan, run, and inspect a bounded prospecting workflow.</p></div>
+        </div>
+
+        <div class="overview-grid">
+          <section class="card goal-card shadow-card">
+            <div class="card-heading"><div><div class="eyebrow">01 / DEFINE</div><h2 class="font-display">Start with a goal</h2></div><span class="step-number">01</span></div>
+            <form id="goal-form">
+              <label for="goal">Prospecting objective</label>
+              <textarea id="goal" rows="4" required minlength="12" placeholder="Describe your ideal customer profile…">Finance leaders at European fintech companies with at least 200 employees</textarea>
+              <div class="form-row two-col">
+                <div><label for="agent-backend">Agent / billing</label><select id="agent-backend"><option value="codex_subscription" selected>Codex subscription · Luna</option><option value="openai_api">OpenAI API key · Luna</option></select></div>
+                <div><label for="agent-model">Model (fixed)</label><input id="agent-model" value="GPT-6 Luna" disabled></div>
+              </div>
+              <div class="form-row three-col">
+                <div><label for="execution-mode">Execution</label><select id="execution-mode"><option value="assisted">Assisted</option><option value="autonomous">Autonomous</option></select></div>
+                <div><label for="data-source">Data source</label><select id="data-source"><option value="simulator">CSV simulator</option><option value="evaboot">Live Evaboot</option></select></div>
+                <div><label for="max-leads">Lead cap</label><select id="max-leads"><option>5</option><option>10</option><option selected>25</option></select></div>
+              </div>
+              <div id="live-auth-row" class="live-auth hidden"><label class="check-label"><input id="live-auth" type="checkbox"> I authorize a small live Evaboot export (may use account credits)</label><p>Quota preflight is required. This runtime has no live email sender.</p></div>
+              <div class="form-row two-col">
+                <div><label for="tool-cap">Tool-call budget</label><select id="tool-cap"><option>8</option><option selected>20</option><option>40</option></select></div>
+                <div><label for="cost-cap" title="Subscription mode uses an API-price-equivalent estimate; plan limits still apply.">Luna usage ceiling</label><select id="cost-cap"><option value="0.10">$0.10 equiv.</option><option value="0.25" selected>$0.25 equiv.</option><option value="0.50">$0.50 equiv.</option></select></div>
+              </div>
+              <details class="advanced"><summary>Audience exclusions &amp; suppression</summary><label for="exclusions">Exclude these audience terms</label><input id="exclusions" placeholder="e.g. agencies, recruiters"><label for="suppressions">Suppression emails or domains</label><input id="suppressions" placeholder="e.g. example.org, person@example.com"></details>
+              <div class="form-footer"><span class="sandbox-hint"><span class="green-dot"></span> Delivery stays sandboxed</span><button id="create-plan" class="button button-green shadow-sm" type="submit">Create plan <span>→</span></button></div>
+            </form>
+          </section>
+
+          <section class="card plan-card shadow-card" id="plan-card">
+            <div class="card-heading"><div><div class="eyebrow">02 / REVIEW</div><h2 class="font-display">Bounded plan</h2></div><span class="step-number">02</span></div>
+            <div id="plan-placeholder" class="placeholder-state"><div class="placeholder-icon ring-8 ring-emerald-50">◌</div><strong>Your plan will appear here</strong><p>The model drafts a search strategy. Review the scope and limits before it runs.</p></div>
+            <div id="plan-content" class="hidden"></div>
+            <div id="plan-actions" class="plan-actions hidden"><button id="execute-run" class="button button-dark shadow-sm">Approve plan &amp; run <span>→</span></button><button id="stop-run" class="button button-outline hidden">Stop run</button></div>
+          </section>
+        </div>
+
+        <section class="card activity-card shadow-card">
+          <div class="card-heading activity-heading"><div><div class="eyebrow">03 / OBSERVE</div><h2 id="activity-title" class="font-display">Run activity</h2></div><div class="activity-tools"><span id="run-status" class="pill pill-neutral">No active run</span><button id="refresh-run" class="icon-button" title="Refresh" aria-label="Refresh run">↻</button></div></div>
+          <div class="activity-metrics" id="activity-metrics"><div><small>TOOL CALLS</small><strong>—</strong></div><div><small>LEADS REVIEWED</small><strong>—</strong></div><div><small>LUNA USAGE EST.</small><strong>—</strong></div><div><small>POLICY VERSION</small><strong>—</strong></div></div>
+          <div id="activity-empty" class="activity-empty">Create a plan to start a run. Every tool call, policy decision, and recovery attempt will be recorded here.</div>
+          <div id="overview-events" class="event-list"></div>
+        </section>
+      </section>
+
+      <section id="view-prospects" class="view">
+        <div class="page-heading compact"><div><div class="eyebrow">RUN OUTPUT</div><h1 class="font-display">Prospects<span class="heading-period">.</span></h1><p>Deterministic gates run before Jev judgment. Personal contact fields are hidden.</p></div><span id="prospect-run-label" class="pill pill-neutral">No run selected</span></div>
+        <div id="prospect-grid" class="prospect-grid"><div class="card empty-large shadow-card"><div class="placeholder-icon">◎</div><strong>No prospect decisions yet</strong><p>Choose a run or create a new plan to inspect the evidence and routing decisions.</p></div></div>
+      </section>
+
+      <section id="view-trace" class="view">
+        <div class="page-heading compact"><div><div class="eyebrow">OBSERVABILITY</div><h1 class="font-display">Run trace<span class="heading-period">.</span></h1><p>Chronological tool calls, model usage, safety gates, and recovery.</p></div><span id="trace-run-label" class="pill pill-neutral">No run selected</span></div>
+        <section class="card trace-card shadow-card"><div id="trace-list" class="trace-list"><div class="empty-large"><div class="placeholder-icon">⌁</div><strong>Trace is empty</strong><p>Select or start a run.</p></div></div></section>
+      </section>
+
+      <section id="view-learning" class="view">
+        <div class="page-heading compact"><div><div class="eyebrow">POLICY &amp; OUTCOMES</div><h1 class="font-display">Learning loop<span class="heading-period">.</span></h1><p>Proposals are evaluated against locked synthetic fixtures before approval or canary promotion.</p></div></div>
+        <div class="learning-grid">
+          <section class="card shadow-card"><div class="card-heading"><div><div class="eyebrow">ACTIVE POLICY</div><h2 id="active-policy-version" class="font-display">—</h2></div><span class="policy-icon">◈</span></div><div id="policy-detail" class="policy-detail">Loading policy…</div></section>
+          <section class="card shadow-card"><div class="card-heading"><div><div class="eyebrow">OBSERVED OUTCOMES</div><h2 class="font-display">Outcome ledger</h2></div><span class="policy-icon">↗</span></div><div id="outcome-detail" class="outcome-detail">No outcome events stored.</div></section>
+        </div>
+        <section class="card candidate-card shadow-card"><div class="card-heading"><div><div class="eyebrow">IMPROVEMENT AGENT</div><h2 class="font-display">Candidate changes</h2></div><button id="run-improvement" class="button button-green shadow-sm" disabled>Evaluate policy idea <span>→</span></button></div><p class="helper-copy">OpenAI may propose only whitelisted targeting changes. Python compares baseline and candidate on held-out cases; model scores cannot edit labels or acceptance thresholds.</p><div id="candidate-list" class="candidate-list"><div class="empty-inline">Select a completed or reviewed run to evaluate a candidate.</div></div></section>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

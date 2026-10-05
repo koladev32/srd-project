@@ -1,0 +1,35 @@
+{
+  "version": "policy-v1",
+  "jev_model": "jev-latest",
+  "question_thresholds": {
+    "current_role_fit": 0.80,
+    "company_fit": 0.80,
+    "claim_support": 0.82,
+    "contradiction_risk_max": 0.15
+  },
+  "reply_policy": {
+    "clear_label_probability": 0.80,
+    "opt_out_possible_floor": 0.05,
+    "ambiguous_suppresses": true
+  },
+  "targeting_rules": {
+    "require_current_job_match": false,
+    "exclude_stale_evidence": false
+  },
+  "deterministic_gates": {
+    "require_matches_filters_yes": true,
+    "require_verified_safe_email": true,
+    "deduplicate_email_and_profile": true,
+    "suppress_opt_out_and_ambiguous": true,
+    "require_exact_source_field_citations": true
+  },
+  "improvement_constraints": {
+    "may_change_hard_gates": false,
+    "may_change_budgets": false,
+    "may_change_acceptance_criteria": false,
+    "allowed_changes": [
+      "require_current_job_match",
+      "exclude_stale_evidence"
+    ]
+  }
+}

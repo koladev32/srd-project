@@ -1,0 +1,11 @@
+{
+  "version": "acceptance-v1",
+  "minimum_heldout_cases": 8,
+  "minimum_auto_approved_precision": 0.85,
+  "maximum_false_approval_rate": 0.10,
+  "minimum_coverage_non_regression": -0.20,
+  "maximum_critical_violations": 0,
+  "maximum_heldout_reply_class_errors": 0,
+  "canary_minimum_observations": 4,
+  "canary_maximum_regression": 0.10
+}
